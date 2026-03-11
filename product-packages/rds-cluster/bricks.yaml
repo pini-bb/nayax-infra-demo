@@ -1,0 +1,108 @@
+name: rds_cluster
+version: 1.0.0
+description: "Aurora PostgreSQL RDS cluster"
+
+inputs:
+  db_name:
+    type: string
+  db_username:
+    type: string
+    default: "nayax_admin"
+  db_port:
+    type: number
+    default: 5432
+  engine_version:
+    type: string
+    default: "15.4"
+  instance_class:
+    type: string
+    default: "db.r6g.large"
+  instance_count:
+    type: number
+    default: 2
+  subnet_ids:
+    type: list(string)
+  vpc_id:
+    type: string
+  allowed_cidr_blocks:
+    type: list(string)
+    default: []
+  environment:
+    type: string
+    default: "dev"
+  region:
+    type: string
+    default: "us-east-1"
+  deletion_protection:
+    type: bool
+    default: false
+  backup_retention_period:
+    type: number
+    default: 7
+  preferred_backup_window:
+    type: string
+    default: "02:00-03:00"
+  preferred_maintenance_window:
+    type: string
+    default: "sun:05:00-sun:06:00"
+
+packages:
+  - id: aws_rds
+    name: aws_rds_aurora
+    version: 9.3.1
+    source: git::https://github.com/terraform-aws-modules/terraform-aws-rds-aurora.git?ref=v9.3.1
+    native:
+      type: opentofu
+      version: "1.11.4"
+    props:
+      name: inputs.db_name
+      engine: "aurora-postgresql"
+      engine_version: inputs.engine_version
+      master_username: inputs.db_username
+      port: inputs.db_port
+      subnets: inputs.subnet_ids
+      vpc_id: inputs.vpc_id
+      allowed_cidr_blocks: inputs.allowed_cidr_blocks
+      instances:
+        one:
+          instance_class: inputs.instance_class
+        two:
+          instance_class: inputs.instance_class
+      deletion_protection: inputs.deletion_protection
+      backup_retention_period: inputs.backup_retention_period
+      preferred_backup_window: inputs.preferred_backup_window
+      preferred_maintenance_window: inputs.preferred_maintenance_window
+      tags:
+        environment: inputs.environment
+      # Null out optional vars with null defaults
+      db_subnet_group_name: ~
+      db_cluster_parameter_group_name: ~
+      db_parameter_group_name: ~
+      iam_role_arn: ~
+      iam_role_name: ~
+      iam_role_description: ~
+      iam_role_path: ~
+      iam_role_permissions_boundary: ~
+      monitoring_role_arn: ~
+      monitoring_role_name: ~
+      monitoring_role_description: ~
+      monitoring_role_path: ~
+      monitoring_role_permissions_boundary: ~
+
+outputs:
+  cluster_id:
+    value: data.aws_rds.cluster_id
+  cluster_arn:
+    value: data.aws_rds.cluster_arn
+  cluster_endpoint:
+    value: data.aws_rds.cluster_endpoint
+  cluster_reader_endpoint:
+    value: data.aws_rds.cluster_reader_endpoint
+  cluster_port:
+    value: data.aws_rds.cluster_port
+  cluster_database_name:
+    value: data.aws_rds.cluster_database_name
+  cluster_master_username:
+    value: data.aws_rds.cluster_master_username
+  security_group_id:
+    value: data.aws_rds.security_group_id

@@ -1,0 +1,85 @@
+name: Bricks Deploy
+
+on:
+  pull_request:
+    paths:
+      - 'environments/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'environments/**'
+
+env:
+  BRICKS_API_KEY: ${{ secrets.BRICKS_API_KEY }}
+  BRICKS_API_URL: https://api.bricks-dev.com
+
+jobs:
+  plan:
+    name: Plan
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Step 1: networking (no $outs dependencies — must run first)
+      - name: Plan networking
+        uses: bluebricks-co/bricks-action@v1
+        with:
+          command: install
+          file: environments/nayax-dev/01-networking.yaml
+          plan-only: true
+          api-key: ${{ env.BRICKS_API_KEY }}
+          api-url: ${{ env.BRICKS_API_URL }}
+
+      # Step 2: EKS — depends on $outs.nayax-dev-networking.*
+      - name: Plan EKS platform
+        uses: bluebricks-co/bricks-action@v1
+        with:
+          command: install
+          file: environments/nayax-dev/02-eks-platform.yaml
+          plan-only: true
+          api-key: ${{ env.BRICKS_API_KEY }}
+          api-url: ${{ env.BRICKS_API_URL }}
+
+      # Step 3: RDS — depends on $outs.nayax-dev-networking.*
+      - name: Plan RDS cluster
+        uses: bluebricks-co/bricks-action@v1
+        with:
+          command: install
+          file: environments/nayax-dev/03-rds-cluster.yaml
+          plan-only: true
+          api-key: ${{ env.BRICKS_API_KEY }}
+          api-url: ${{ env.BRICKS_API_URL }}
+
+  apply:
+    name: Apply
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Apply in dependency order: networking first, then eks + rds
+      - name: Apply networking
+        uses: bluebricks-co/bricks-action@v1
+        with:
+          command: install
+          file: environments/nayax-dev/01-networking.yaml
+          api-key: ${{ env.BRICKS_API_KEY }}
+          api-url: ${{ env.BRICKS_API_URL }}
+
+      - name: Apply EKS platform
+        uses: bluebricks-co/bricks-action@v1
+        with:
+          command: install
+          file: environments/nayax-dev/02-eks-platform.yaml
+          api-key: ${{ env.BRICKS_API_KEY }}
+          api-url: ${{ env.BRICKS_API_URL }}
+
+      - name: Apply RDS cluster
+        uses: bluebricks-co/bricks-action@v1
+        with:
+          command: install
+          file: environments/nayax-dev/03-rds-cluster.yaml
+          api-key: ${{ env.BRICKS_API_KEY }}
+          api-url: ${{ env.BRICKS_API_URL }}

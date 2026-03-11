@@ -1,0 +1,21 @@
+apiVersion: bricksv1
+kind: Deployment
+metadata:
+  name: nayax-dev-eks
+spec:
+  blueprint: eks_platform
+  version: 1.0.0
+  collection: andrii-test-1-1
+  force: false
+  planOnly: false
+  props:
+    cluster_name: nayax-dev-eks
+    cluster_version: "1.31"
+    vpc_id: $outs.nayax-dev-networking.aws_vpc.vpc_id
+    subnet_ids: $outs.nayax-dev-networking.aws_vpc.private_subnets
+    region: us-east-1
+    environment: dev
+    node_instance_type: m5.large
+    node_min_size: 2
+    node_max_size: 6
+    node_desired_size: 3

@@ -1,0 +1,82 @@
+name: networking_stack
+version: 1.0.0
+description: "VPC with public/private subnets across multiple AZs"
+
+inputs:
+  vpc_name:
+    type: string
+  cidr:
+    type: string
+    default: "10.0.0.0/16"
+  azs:
+    type: list(string)
+    default: ["us-east-1a", "us-east-1b", "us-east-1c"]
+  private_subnets:
+    type: list(string)
+    default: ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+  public_subnets:
+    type: list(string)
+    default: ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+  enable_nat_gateway:
+    type: bool
+    default: true
+  single_nat_gateway:
+    type: bool
+    default: true
+  environment:
+    type: string
+    default: "dev"
+  region:
+    type: string
+    default: "us-east-1"
+
+packages:
+  - id: aws_vpc
+    name: aws_vpc
+    version: 5.21.0
+    source: git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=v5.21.0
+    native:
+      type: opentofu
+      version: "1.11.4"
+    props:
+      name: inputs.vpc_name
+      cidr: inputs.cidr
+      azs: inputs.azs
+      private_subnets: inputs.private_subnets
+      public_subnets: inputs.public_subnets
+      enable_nat_gateway: inputs.enable_nat_gateway
+      single_nat_gateway: inputs.single_nat_gateway
+      tags:
+        environment: inputs.environment
+      # Null out optional vars with null defaults to prevent auto-wiring
+      ipv4_ipam_pool_id: ~
+      ipv4_netmask_length: ~
+      ipv6_cidr: ~
+      ipv6_ipam_pool_id: ~
+      ipv6_netmask_length: ~
+      outpost_arn: ~
+      outpost_az: ~
+      default_security_group_name: ~
+      default_route_table_name: ~
+      default_network_acl_name: ~
+      default_vpc_name: ~
+      vpn_gateway_az: ~
+      redshift_subnet_group_name: ~
+      elasticache_subnet_group_name: ~
+      database_subnet_group_name: ~
+      flow_log_cloudwatch_log_group_kms_key_id: ~
+      flow_log_cloudwatch_log_group_class: ~
+
+outputs:
+  vpc_id:
+    value: data.aws_vpc.vpc_id
+  vpc_cidr_block:
+    value: data.aws_vpc.vpc_cidr_block
+  private_subnets:
+    value: data.aws_vpc.private_subnets
+  public_subnets:
+    value: data.aws_vpc.public_subnets
+  private_route_table_ids:
+    value: data.aws_vpc.private_route_table_ids
+  nat_public_ips:
+    value: data.aws_vpc.nat_public_ips

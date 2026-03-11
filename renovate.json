@@ -1,0 +1,29 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base"],
+  "packageRules": [
+    {
+      "description": "Watch terraform-aws-modules tags referenced in bricks.yaml source fields",
+      "matchFileNames": ["product-packages/**/bricks.yaml"],
+      "matchPackagePatterns": ["^terraform-aws-modules/"],
+      "groupName": "terraform-aws-modules",
+      "labels": ["dependencies", "terraform"],
+      "automerge": false,
+      "prBodyNotes": [
+        "This PR bumps a `?ref=` pin in a product-package `bricks.yaml`.",
+        "After merging, re-publish the affected package with `bricks bp publish` and bump the version in the relevant environment manifest."
+      ]
+    }
+  ],
+  "regexManagers": [
+    {
+      "description": "Match git source refs in bricks.yaml package source fields",
+      "fileMatch": ["^product-packages/.+/bricks\\.yaml$"],
+      "matchStrings": [
+        "source: git::https://github\\.com/(?<depName>[^.]+/[^.]+)\\.git(?://[^?]+)?\\?ref=v(?<currentValue>[\\d.]+)"
+      ],
+      "datasourceTemplate": "github-tags",
+      "versioningTemplate": "semver"
+    }
+  ]
+}

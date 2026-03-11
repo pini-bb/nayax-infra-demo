@@ -1,0 +1,61 @@
+name: Publish Blueprints
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'product-packages/**'
+
+env:
+  BRICKS_API_KEY: ${{ secrets.BRICKS_API_KEY }}
+  BRICKS_API_URL: https://api.bricks-dev.com
+
+jobs:
+  publish:
+    name: Publish changed blueprints
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed packages
+        id: changed
+        env:
+          BASE_SHA: ${{ github.event.before }}
+        run: |
+          CHANGED=$(git diff --name-only "$BASE_SHA"...HEAD | grep '^product-packages/' | awk -F/ '{print $2}' | sort -u)
+          echo "packages<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$CHANGED" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Publish networking-stack
+        if: contains(steps.changed.outputs.packages, 'networking-stack')
+        uses: bluebricks-co/bricks-action@v1
+        with:
+          command: bp
+          subcommand: publish
+          src: product-packages/networking-stack
+          api-key: ${{ env.BRICKS_API_KEY }}
+          api-url: ${{ env.BRICKS_API_URL }}
+
+      - name: Publish eks-platform
+        if: contains(steps.changed.outputs.packages, 'eks-platform')
+        uses: bluebricks-co/bricks-action@v1
+        with:
+          command: bp
+          subcommand: publish
+          src: product-packages/eks-platform
+          api-key: ${{ env.BRICKS_API_KEY }}
+          api-url: ${{ env.BRICKS_API_URL }}
+
+      - name: Publish rds-cluster
+        if: contains(steps.changed.outputs.packages, 'rds-cluster')
+        uses: bluebricks-co/bricks-action@v1
+        with:
+          command: bp
+          subcommand: publish
+          src: product-packages/rds-cluster
+          api-key: ${{ env.BRICKS_API_KEY }}
+          api-url: ${{ env.BRICKS_API_URL }}
