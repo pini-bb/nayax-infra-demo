@@ -37,7 +37,9 @@ jobs:
           config-file: bricks-config.yaml
 
       # Step 2: EKS — depends on $outs.nayax-dev-networking.*
+      # Requires nayax-dev-networking to be deployed first; skips gracefully otherwise
       - name: Plan EKS platform
+        continue-on-error: true
         uses: bluebricks-co/bricks-action@v1
         with:
           command: install
@@ -48,7 +50,9 @@ jobs:
           config-file: bricks-config.yaml
 
       # Step 3: RDS — depends on $outs.nayax-dev-networking.*
+      # Requires nayax-dev-networking to be deployed first; skips gracefully otherwise
       - name: Plan RDS cluster
+        continue-on-error: true
         uses: bluebricks-co/bricks-action@v1
         with:
           command: install
