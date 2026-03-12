@@ -20,7 +20,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       # Step 1: networking (no $outs dependencies — must run first)
       - name: Plan networking
@@ -60,7 +60,7 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       # Apply in dependency order: networking first, then eks + rds
       - name: Apply networking
