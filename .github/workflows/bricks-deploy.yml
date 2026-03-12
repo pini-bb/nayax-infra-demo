@@ -31,6 +31,7 @@ jobs:
           plan-only: true
           api-key: ${{ env.BRICKS_API_KEY }}
           api-url: ${{ env.BRICKS_API_URL }}
+          config-file: bricks-config.yaml
 
       # Step 2: EKS — depends on $outs.nayax-dev-networking.*
       - name: Plan EKS platform
@@ -41,6 +42,7 @@ jobs:
           plan-only: true
           api-key: ${{ env.BRICKS_API_KEY }}
           api-url: ${{ env.BRICKS_API_URL }}
+          config-file: bricks-config.yaml
 
       # Step 3: RDS — depends on $outs.nayax-dev-networking.*
       - name: Plan RDS cluster
@@ -51,6 +53,7 @@ jobs:
           plan-only: true
           api-key: ${{ env.BRICKS_API_KEY }}
           api-url: ${{ env.BRICKS_API_URL }}
+          config-file: bricks-config.yaml
 
   apply:
     name: Apply
@@ -67,6 +70,7 @@ jobs:
           file: environments/nayax-dev/01-networking.yaml
           api-key: ${{ env.BRICKS_API_KEY }}
           api-url: ${{ env.BRICKS_API_URL }}
+          config-file: bricks-config.yaml
 
       - name: Apply EKS platform
         uses: bluebricks-co/bricks-action@v1
@@ -75,6 +79,7 @@ jobs:
           file: environments/nayax-dev/02-eks-platform.yaml
           api-key: ${{ env.BRICKS_API_KEY }}
           api-url: ${{ env.BRICKS_API_URL }}
+          config-file: bricks-config.yaml
 
       - name: Apply RDS cluster
         uses: bluebricks-co/bricks-action@v1
@@ -83,3 +88,4 @@ jobs:
           file: environments/nayax-dev/03-rds-cluster.yaml
           api-key: ${{ env.BRICKS_API_KEY }}
           api-url: ${{ env.BRICKS_API_URL }}
+          config-file: bricks-config.yaml

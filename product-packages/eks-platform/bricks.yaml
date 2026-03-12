@@ -1,5 +1,5 @@
 name: eks_platform
-version: 1.0.0
+version: 1.0.4
 description: "EKS cluster with ArgoCD capability"
 
 inputs:
@@ -54,7 +54,7 @@ packages:
           desired_size: inputs.node_desired_size
       tags:
         environment: inputs.environment
-      # Null out optional vars with null defaults
+      # Nullable EKS module vars — hardcoded null so callers don't need to supply them
       cluster_service_ipv4_cidr: ~
       cluster_service_ipv6_cidr: ~
       bootstrap_self_managed_addons: ~
@@ -87,10 +87,7 @@ packages:
       cluster_name: data.aws_eks.cluster_name
       type: "argo_cd"
       region: inputs.region
-      # Null out optional vars with null defaults
-      configuration: ~
-      timeouts: ~
-      iam_policy_statements: ~
+      # Nullable ArgoCD capability vars
       iam_role_arn: ~
       iam_role_name: ~
       iam_role_path: ~

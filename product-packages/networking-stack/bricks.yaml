@@ -1,5 +1,5 @@
 name: networking_stack
-version: 1.0.0
+version: 1.0.4
 description: "VPC with public/private subnets across multiple AZs"
 
 inputs:
@@ -48,12 +48,13 @@ packages:
       single_nat_gateway: inputs.single_nat_gateway
       tags:
         environment: inputs.environment
-      # Null out optional vars with null defaults to prevent auto-wiring
+      # Nullable Terraform module vars — hardcoded null so callers don't need to supply them
       ipv4_ipam_pool_id: ~
       ipv4_netmask_length: ~
       ipv6_cidr: ~
       ipv6_ipam_pool_id: ~
       ipv6_netmask_length: ~
+      ipv6_cidr_block_network_border_group: ~
       outpost_arn: ~
       outpost_az: ~
       default_security_group_name: ~
@@ -64,8 +65,23 @@ packages:
       redshift_subnet_group_name: ~
       elasticache_subnet_group_name: ~
       database_subnet_group_name: ~
+      customer_owned_ipv4_pool: ~
       flow_log_cloudwatch_log_group_kms_key_id: ~
       flow_log_cloudwatch_log_group_class: ~
+      flow_log_cloudwatch_log_group_retention_in_days: ~
+      flow_log_deliver_cross_account_role: ~
+      flow_log_log_format: ~
+      flow_log_file_format: ~
+      vpc_flow_log_permissions_boundary: ~
+      enable_network_address_usage_metrics: ~
+      dhcp_options_ipv6_address_preferred_lease_time: ~
+      intra_subnet_private_dns_hostname_type_on_launch: ~
+      public_subnet_private_dns_hostname_type_on_launch: ~
+      outpost_subnet_private_dns_hostname_type_on_launch: ~
+      private_subnet_private_dns_hostname_type_on_launch: ~
+      database_subnet_private_dns_hostname_type_on_launch: ~
+      redshift_subnet_private_dns_hostname_type_on_launch: ~
+      elasticache_subnet_private_dns_hostname_type_on_launch: ~
 
 outputs:
   vpc_id:

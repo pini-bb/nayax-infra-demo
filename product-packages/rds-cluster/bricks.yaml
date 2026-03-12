@@ -1,5 +1,5 @@
 name: rds_cluster
-version: 1.0.0
+version: 1.0.4
 description: "Aurora PostgreSQL RDS cluster"
 
 inputs:
@@ -74,7 +74,7 @@ packages:
       preferred_maintenance_window: inputs.preferred_maintenance_window
       tags:
         environment: inputs.environment
-      # Null out optional vars with null defaults
+      # Nullable RDS module vars — hardcoded null so callers don't need to supply them
       db_subnet_group_name: ~
       db_cluster_parameter_group_name: ~
       db_parameter_group_name: ~

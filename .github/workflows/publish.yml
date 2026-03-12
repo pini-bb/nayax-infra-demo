@@ -25,7 +25,13 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.before }}
         run: |
-          CHANGED=$(git diff --name-only "$BASE_SHA"...HEAD | grep '^product-packages/' | awk -F/ '{print $2}' | sort -u)
+          NULL_SHA="0000000000000000000000000000000000000000"
+          if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "$NULL_SHA" ]; then
+            # First push — publish all packages
+            CHANGED=$(ls product-packages/)
+          else
+            CHANGED=$(git diff --name-only "$BASE_SHA"...HEAD | grep '^product-packages/' | awk -F/ '{print $2}' | sort -u)
+          fi
           echo "packages<<EOF" >> "$GITHUB_OUTPUT"
           echo "$CHANGED" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
@@ -39,6 +45,7 @@ jobs:
           src: product-packages/networking-stack
           api-key: ${{ env.BRICKS_API_KEY }}
           api-url: ${{ env.BRICKS_API_URL }}
+          config-file: bricks-config.yaml
 
       - name: Publish eks-platform
         if: contains(steps.changed.outputs.packages, 'eks-platform')
@@ -49,6 +56,7 @@ jobs:
           src: product-packages/eks-platform
           api-key: ${{ env.BRICKS_API_KEY }}
           api-url: ${{ env.BRICKS_API_URL }}
+          config-file: bricks-config.yaml
 
       - name: Publish rds-cluster
         if: contains(steps.changed.outputs.packages, 'rds-cluster')
@@ -59,3 +67,4 @@ jobs:
           src: product-packages/rds-cluster
           api-key: ${{ env.BRICKS_API_KEY }}
           api-url: ${{ env.BRICKS_API_URL }}
+          config-file: bricks-config.yaml

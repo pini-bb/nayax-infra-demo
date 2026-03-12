@@ -4,7 +4,7 @@ metadata:
   name: nayax-dev-rds
 spec:
   blueprint: rds_cluster
-  version: 1.0.0
+  version: 1.0.4
   collection: andrii-test-1-1
   force: false
   planOnly: false
