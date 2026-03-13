@@ -36,7 +36,7 @@ packages:
   - id: aws_eks
     name: aws_eks
     version: 20.31.6
-    source: git::https://github.com/terraform-aws-modules/terraform-aws-eks.git?ref=v20.31.6
+    source: git::https://github.com/terraform-aws-modules/terraform-aws-eks.git?ref=v21.15.1
     native:
       type: opentofu
       version: "1.11.4"
@@ -79,7 +79,7 @@ packages:
   - id: argocd
     name: eks_argocd_capability
     version: 20.31.6
-    source: git::https://github.com/terraform-aws-modules/terraform-aws-eks.git//modules/capability?ref=v20.31.6
+    source: git::https://github.com/terraform-aws-modules/terraform-aws-eks.git//modules/capability?ref=v21.15.1
     native:
       type: opentofu
       version: "1.11.4"
