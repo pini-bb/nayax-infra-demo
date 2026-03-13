@@ -50,7 +50,7 @@ packages:
   - id: aws_rds
     name: aws_rds_aurora
     version: 9.3.1
-    source: git::https://github.com/terraform-aws-modules/terraform-aws-rds-aurora.git?ref=v9.3.1
+    source: git::https://github.com/terraform-aws-modules/terraform-aws-rds-aurora.git?ref=v9.16.1
     native:
       type: opentofu
       version: "1.11.4"
