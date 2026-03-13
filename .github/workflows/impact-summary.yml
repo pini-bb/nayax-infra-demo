@@ -82,7 +82,7 @@ jobs:
               body += '_No environment deployments reference these packages yet._\n';
             }
 
-            body += '\n> **Note:** Input-level diffs (which specific inputs changed) are not yet native in BlueBricks. This table shows affected deployments and versions only.\n';
+            body += '\n> **Note:** Input-level diffs (which specific inputs changed) are not yet native in Bluebricks. This table shows affected deployments and versions only.\n';
 
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
