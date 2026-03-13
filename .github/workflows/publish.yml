@@ -47,6 +47,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Bump blueprint version
+        uses: bluebricks-co/bricks-action@v1
+        with:
+          command: bp
+          subcommand: bump --patch
+          src: product-packages/${{ matrix.package }}
+          api-key: ${{ env.BRICKS_API_KEY }}
+          api-url: ${{ env.BRICKS_API_URL }}
+          config-file: bricks-config.yaml
+
       - name: Publish blueprint
         uses: bluebricks-co/bricks-action@v1
         with:
