@@ -4,8 +4,7 @@
   "hostRules": [
     {
       "matchHost": "api.bricks-dev.com",
-      "httpHeader": "Authorization",
-      "httpHeaderValue": "Bearer ${BRICKS_API_KEY}"
+      "token": "${BRICKS_API_KEY}"
     }
   ],
   "customDatasources": {
@@ -46,7 +45,7 @@
     {
       "customType": "regex",
       "description": "Match upstream git source refs in product-package bricks.yaml",
-      "fileMatch": ["^product-packages/.+/bricks\\.yaml$"],
+      "managerFilePatterns": ["/^product-packages/.+/bricks\\.yaml$/"],
       "matchStrings": [
         "source: git::https://github\\.com/(?<depName>[^.]+/[^.]+)\\.git(?://[^?]+)?\\?ref=v(?<currentValue>[\\d.]+)"
       ],
@@ -56,7 +55,7 @@
     {
       "customType": "regex",
       "description": "Match blueprint versions in environment manifests",
-      "fileMatch": ["^environments/.+\\.yaml$"],
+      "managerFilePatterns": ["/^environments/.+\\.yaml$/"],
       "matchStrings": [
         "blueprint: (?<packageName>\\S+)\\n\\s+version: (?<currentValue>[\\d.]+)"
       ],
