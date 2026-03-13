@@ -1,0 +1,58 @@
+name: Publish Blueprints
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'product-packages/**'
+
+env:
+  BRICKS_API_KEY: ${{ secrets.BRICKS_API_KEY }}
+  BRICKS_API_URL: https://api.bricks-dev.com
+
+jobs:
+  detect:
+    name: Detect changed packages
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.changed.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed packages
+        id: changed
+        env:
+          BASE_SHA: ${{ github.event.before }}
+        run: |
+          NULL_SHA="0000000000000000000000000000000000000000"
+          if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "$NULL_SHA" ]; then
+            CHANGED=$(ls product-packages/)
+          else
+            CHANGED=$(git diff --name-only "$BASE_SHA"...HEAD | grep '^product-packages/' | awk -F/ '{print $2}' | sort -u)
+          fi
+          JSON=$(echo "$CHANGED" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "packages=$JSON" >> "$GITHUB_OUTPUT"
+
+  publish:
+    name: Publish ${{ matrix.package }}
+    needs: detect
+    if: needs.detect.outputs.packages != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: ${{ fromJson(needs.detect.outputs.packages) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish blueprint
+        uses: bluebricks-co/bricks-action@v1
+        with:
+          command: bp
+          subcommand: publish
+          src: product-packages/${{ matrix.package }}
+          api-key: ${{ env.BRICKS_API_KEY }}
+          api-url: ${{ env.BRICKS_API_URL }}
+          config-file: bricks-config.yaml

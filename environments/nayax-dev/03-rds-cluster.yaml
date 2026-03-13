@@ -1,0 +1,27 @@
+apiVersion: bricksv1
+kind: Deployment
+metadata:
+  name: nayax-dev-rds
+spec:
+  blueprint: rds_cluster
+  version: 1.0.4
+  collection: andrii-test-1-1
+  force: false
+  planOnly: false
+  props:
+    db_name: nayax-app
+    db_username: nayax_admin
+    db_port: 5432
+    engine_version: "15.4"
+    instance_class: db.r6g.large
+    instance_count: 2
+    subnet_ids: $outs.nayax-dev-networking.aws_vpc.private_subnets
+    vpc_id: $outs.nayax-dev-networking.aws_vpc.vpc_id
+    allowed_cidr_blocks:
+      - "10.0.0.0/16"
+    environment: dev
+    region: us-east-1
+    deletion_protection: false
+    backup_retention_period: 7
+    preferred_backup_window: "02:00-03:00"
+    preferred_maintenance_window: "sun:05:00-sun:06:00"

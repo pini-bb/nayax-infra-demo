@@ -1,0 +1,113 @@
+name: eks_platform
+version: 1.0.4
+description: "EKS cluster with ArgoCD capability"
+
+inputs:
+  cluster_name:
+    type: string
+  cluster_version:
+    type: string
+    default: "1.31"
+    allowed_values: ["1.29", "1.30", "1.31", "1.32"]
+  vpc_id:
+    type: string
+  subnet_ids:
+    type: list(string)
+  region:
+    type: string
+    default: "us-east-1"
+  environment:
+    type: string
+    default: "dev"
+  node_instance_type:
+    type: string
+    default: "m5.large"
+  node_min_size:
+    type: number
+    default: 2
+  node_max_size:
+    type: number
+    default: 6
+  node_desired_size:
+    type: number
+    default: 3
+
+packages:
+  - id: aws_eks
+    name: aws_eks
+    version: 20.31.6
+    source: git::https://github.com/terraform-aws-modules/terraform-aws-eks.git?ref=v20.31.6
+    native:
+      type: opentofu
+      version: "1.11.4"
+    props:
+      cluster_name: inputs.cluster_name
+      cluster_version: inputs.cluster_version
+      vpc_id: inputs.vpc_id
+      subnet_ids: inputs.subnet_ids
+      region: inputs.region
+      eks_managed_node_groups:
+        default:
+          instance_types: [inputs.node_instance_type]
+          min_size: inputs.node_min_size
+          max_size: inputs.node_max_size
+          desired_size: inputs.node_desired_size
+      tags:
+        environment: inputs.environment
+      # Nullable EKS module vars — hardcoded null so callers don't need to supply them
+      cluster_service_ipv4_cidr: ~
+      cluster_service_ipv6_cidr: ~
+      bootstrap_self_managed_addons: ~
+      kms_key_description: ~
+      kms_key_deletion_window_in_days: ~
+      cloudwatch_log_group_kms_key_id: ~
+      cloudwatch_log_group_class: ~
+      cluster_security_group_name: ~
+      node_security_group_name: ~
+      iam_role_arn: ~
+      iam_role_name: ~
+      iam_role_path: ~
+      iam_role_description: ~
+      iam_role_permissions_boundary: ~
+      cluster_encryption_policy_name: ~
+      cluster_encryption_policy_path: ~
+      node_iam_role_name: ~
+      node_iam_role_path: ~
+      node_iam_role_description: ~
+      node_iam_role_permissions_boundary: ~
+
+  - id: argocd
+    name: eks_argocd_capability
+    version: 20.31.6
+    source: git::https://github.com/terraform-aws-modules/terraform-aws-eks.git//modules/capability?ref=v20.31.6
+    native:
+      type: opentofu
+      version: "1.11.4"
+    props:
+      cluster_name: data.aws_eks.cluster_name
+      type: "argo_cd"
+      region: inputs.region
+      # Nullable ArgoCD capability vars
+      iam_role_arn: ~
+      iam_role_name: ~
+      iam_role_path: ~
+      iam_role_description: ~
+      iam_role_max_session_duration: ~
+      iam_role_permissions_boundary_arn: ~
+      iam_policy_name: ~
+      iam_policy_path: ~
+      iam_policy_description: ~
+
+outputs:
+  cluster_name:
+    value: data.aws_eks.cluster_name
+  cluster_version:
+    value: data.aws_eks.cluster_version
+  cluster_endpoint:
+    value: data.aws_eks.cluster_endpoint
+  cluster_certificate_authority_data:
+    value: data.aws_eks.cluster_certificate_authority_data
+  cluster_oidc_issuer_url:
+    value: data.aws_eks.cluster_oidc_issuer_url
+  node_security_group_id:
+    value: data.aws_eks.node_security_group_id
