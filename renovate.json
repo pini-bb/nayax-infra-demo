@@ -9,9 +9,9 @@
   ],
   "customDatasources": {
     "bluebricks": {
-      "defaultRegistryUrlTemplate": "https://api.bricks-dev.com/api/v1/package/versions?packageName={{packageName}}",
+      "defaultRegistryUrlTemplate": "https://api.bricks-dev.com/api/v1/package/versions?package={{packageName}}",
       "transformTemplates": [
-        "{\"releases\": $map(versions, function($v) { {\"version\": $v} })}"
+        "{\"releases\": $map(versions, function($v) { {\"version\": $v.version} })}"
       ]
     }
   },
