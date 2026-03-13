@@ -48,28 +48,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Publish blueprint
-        id: publish
-        continue-on-error: true
-        uses: bluebricks-co/bricks-action@v1
-        with:
-          command: bp
-          subcommand: publish
-          src: product-packages/${{ matrix.package }}
-          api-key: ${{ env.BRICKS_API_KEY }}
-          api-url: ${{ env.BRICKS_API_URL }}
-          config-file: bricks-config.yaml
-
-      - name: Bump patch version and retry
-        if: steps.publish.outcome == 'failure'
-        run: |
-          BRICKS_YAML="product-packages/${{ matrix.package }}/bricks.yaml"
-          VERSION=$(grep '^version:' "$BRICKS_YAML" | awk '{print $2}')
-          IFS=. read -r MAJOR MINOR PATCH <<< "$VERSION"
-          sed -i "s/^version: $VERSION/version: $MAJOR.$MINOR.$((PATCH + 1))/" "$BRICKS_YAML"
-          echo "Bumped to $MAJOR.$MINOR.$((PATCH + 1))"
-
-      - name: Retry publish
-        if: steps.publish.outcome == 'failure'
         uses: bluebricks-co/bricks-action@v1
         with:
           command: bp

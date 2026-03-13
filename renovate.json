@@ -41,6 +41,14 @@
       ]
     }
   ],
+  "bumpVersions": [
+    {
+      "name": "Bump blueprint version on dependency update",
+      "filePatterns": ["product-packages/**/bricks.yaml"],
+      "matchStrings": ["^version:\\s*(?<version>[^\\s]+)"],
+      "bumpType": "patch"
+    }
+  ],
   "customManagers": [
     {
       "customType": "regex",
