@@ -23,6 +23,14 @@
       "groupName": "terraform-aws-modules",
       "labels": ["dependencies", "terraform"],
       "automerge": false,
+      "bumpVersions": [
+        {
+          "name": "Bump blueprint version on dependency update",
+          "filePatterns": ["{{packageFileDir}}/bricks.yaml"],
+          "matchStrings": ["version:\\s(?<version>[^\\s]+)"],
+          "bumpType": "patch"
+        }
+      ],
       "prBodyNotes": [
         "This PR bumps a `?ref=` pin in a product-package `bricks.yaml`.",
         "After merging, the publish workflow will auto-publish the affected blueprint."
@@ -39,14 +47,6 @@
         "On PR open, the deploy workflow will run a Terraform plan.",
         "On merge to main, the deploy workflow will apply."
       ]
-    }
-  ],
-  "bumpVersions": [
-    {
-      "name": "Bump blueprint version on dependency update",
-      "filePatterns": ["product-packages/**/bricks.yaml"],
-      "matchStrings": ["^version:\\s*(?<version>[^\\s]+)"],
-      "bumpType": "patch"
     }
   ],
   "customManagers": [
