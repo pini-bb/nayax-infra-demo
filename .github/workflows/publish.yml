@@ -47,15 +47,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Bump blueprint version
-        uses: bluebricks-co/bricks-action@v1
-        with:
-          command: bp
-          subcommand: bump --patch
-          src: product-packages/${{ matrix.package }}
-          api-key: ${{ env.BRICKS_API_KEY }}
-          api-url: ${{ env.BRICKS_API_URL }}
-          config-file: bricks-config.yaml
+      - name: Bump patch version if unchanged
+        env:
+          BASE_SHA: ${{ github.event.before }}
+        run: |
+          BRICKS_YAML="product-packages/${{ matrix.package }}/bricks.yaml"
+          NULL_SHA="0000000000000000000000000000000000000000"
+          # Check if the version line was already changed in this push
+          if [ -n "$BASE_SHA" ] && [ "$BASE_SHA" != "$NULL_SHA" ]; then
+            if git diff "$BASE_SHA"...HEAD -- "$BRICKS_YAML" | grep -q '^[+-]version:'; then
+              echo "Version already bumped manually — skipping auto-bump"
+              exit 0
+            fi
+          fi
+          # Auto-bump patch version
+          VERSION=$(grep '^version:' "$BRICKS_YAML" | awk '{print $2}')
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+          MINOR=$(echo "$VERSION" | cut -d. -f2)
+          PATCH=$(echo "$VERSION" | cut -d. -f3)
+          NEW_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
+          sed -i "s/^version: $VERSION/version: $NEW_VERSION/" "$BRICKS_YAML"
+          echo "Bumped $BRICKS_YAML: $VERSION -> $NEW_VERSION"
 
       - name: Publish blueprint
         uses: bluebricks-co/bricks-action@v1
