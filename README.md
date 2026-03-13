@@ -116,13 +116,7 @@ When a PR modifies any file under `product-packages/**`, the `impact-summary.yml
 
 ## State Migration (Q7)
 
-State migration (moving existing Terraform state into Bluebricks management) is out of scope for this demo repo. The flow is:
-
-1. Export existing state: `terraform state pull > existing.tfstate`
-2. Identify the resource addresses
-3. Use `bricks env migrate` to import state into the Bluebricks-managed workspace
-4. Verify with `bricks install --plan-only` that no destructive changes are planned
-5. Apply
+State migration (moving existing Terraform state into Bluebricks management) is out of scope for this demo repo. The general approach is to export your existing Terraform state and import it into the Bluebricks-managed workspace — consult Bluebricks support for the exact steps, as the migration tooling is environment-specific.
 
 This is a one-time operational step per environment, not a GitOps workflow artifact.
 
