@@ -42,8 +42,9 @@
       ]
     }
   ],
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "description": "Match upstream git source refs in product-package bricks.yaml",
       "fileMatch": ["^product-packages/.+/bricks\\.yaml$"],
       "matchStrings": [
@@ -53,6 +54,7 @@
       "versioningTemplate": "semver"
     },
     {
+      "customType": "regex",
       "description": "Match blueprint versions in environment manifests",
       "fileMatch": ["^environments/.+\\.yaml$"],
       "matchStrings": [
