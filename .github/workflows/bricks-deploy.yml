@@ -1,0 +1,79 @@
+name: Bricks Deploy
+
+on:
+  pull_request:
+    paths:
+      - 'environments/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'environments/**'
+
+env:
+  BRICKS_API_KEY: ${{ secrets.BRICKS_API_KEY }}
+  BRICKS_API_URL: https://api.bricks-dev.com
+
+jobs:
+  detect:
+    name: Detect manifests
+    runs-on: ubuntu-latest
+    outputs:
+      manifests: ${{ steps.list.outputs.manifests }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: List environment manifests in dependency order
+        id: list
+        run: |
+          MANIFESTS=$(find environments -name '*.yaml' | sort | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "manifests=$MANIFESTS" >> "$GITHUB_OUTPUT"
+
+  plan:
+    name: Plan ${{ matrix.manifest }}
+    needs: detect
+    if: github.event_name == 'pull_request' && needs.detect.outputs.manifests != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        manifest: ${{ fromJson(needs.detect.outputs.manifests) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Plan
+        continue-on-error: true
+        uses: bluebricks-co/bricks-action@v1
+        with:
+          command: install
+          file: ${{ matrix.manifest }}
+          plan-only: true
+          api-key: ${{ env.BRICKS_API_KEY }}
+          api-url: ${{ env.BRICKS_API_URL }}
+          config-file: bricks-config.yaml
+
+  apply:
+    name: Apply ${{ matrix.manifest }}
+    needs: detect
+    if: github.event_name == 'push' && needs.detect.outputs.manifests != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        manifest: ${{ fromJson(needs.detect.outputs.manifests) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply
+        uses: bluebricks-co/bricks-action@v1
+        with:
+          command: install
+          file: ${{ matrix.manifest }}
+          api-key: ${{ env.BRICKS_API_KEY }}
+          api-url: ${{ env.BRICKS_API_URL }}
+          config-file: bricks-config.yaml

@@ -1,0 +1,3 @@
+backend_api_url: https://api.bricks-dev.com
+web_app_url: https://app.bricks-dev.com
+non_interactive: true

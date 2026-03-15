@@ -1,0 +1,74 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base"],
+  "hostRules": [
+    {
+      "matchHost": "api.bricks-dev.com",
+      "token": "{{ secrets.BRICKS_API_KEY }}"
+    }
+  ],
+  "customDatasources": {
+    "bluebricks": {
+      "defaultRegistryUrlTemplate": "https://api.bricks-dev.com/api/v1/package/versions?package={{packageName}}",
+      "transformTemplates": [
+        "{\"releases\": $map(versions, function($v) { {\"version\": $v.version} })}"
+      ]
+    }
+  },
+  "packageRules": [
+    {
+      "description": "Upstream Terraform module tag bumps in product packages",
+      "matchFileNames": ["product-packages/**/bricks.yaml"],
+      "matchPackagePatterns": ["^terraform-aws-modules/"],
+      "groupName": "terraform-aws-modules",
+      "labels": ["dependencies", "terraform"],
+      "automerge": false,
+      "bumpVersions": [
+        {
+          "name": "Bump blueprint version on dependency update",
+          "filePatterns": ["product-packages/**/bricks.yaml"],
+          "matchStrings": ["version:\\s(?<version>[^\\s]+)"],
+          "bumpType": "patch"
+        }
+      ],
+      "prBodyNotes": [
+        "This PR bumps a `?ref=` pin in a product-package `bricks.yaml`.",
+        "After merging, the publish workflow will auto-publish the affected blueprint."
+      ]
+    },
+    {
+      "description": "Blueprint version bumps in environment manifests",
+      "matchFileNames": ["environments/**/*.yaml"],
+      "matchDatasources": ["custom.bluebricks"],
+      "labels": ["dependencies", "blueprint"],
+      "automerge": false,
+      "prBodyNotes": [
+        "This PR bumps a blueprint version in an environment manifest.",
+        "On PR open, the deploy workflow will run a Terraform plan.",
+        "On merge to main, the deploy workflow will apply."
+      ]
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Match upstream git source refs in product-package bricks.yaml",
+      "managerFilePatterns": ["/^product-packages/.+/bricks\\.yaml$/"],
+      "matchStrings": [
+        "source: git::https://github\\.com/(?<depName>[^.]+/[^.]+)\\.git(?://[^?]+)?\\?ref=v(?<currentValue>[\\d.]+)"
+      ],
+      "datasourceTemplate": "github-tags",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "description": "Match blueprint versions in environment manifests",
+      "managerFilePatterns": ["/^environments/.+\\.yaml$/"],
+      "matchStrings": [
+        "blueprint: (?<packageName>\\S+)\\n\\s+version: (?<currentValue>[\\d.]+)"
+      ],
+      "datasourceTemplate": "custom.bluebricks",
+      "versioningTemplate": "semver"
+    }
+  ]
+}

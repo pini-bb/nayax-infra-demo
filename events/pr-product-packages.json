@@ -1,0 +1,21 @@
+{
+  "action": "opened",
+  "number": 1,
+  "pull_request": {
+    "number": 1,
+    "head": {
+      "ref": "test-package-change",
+      "sha": "ece13582a3d447d18164da739abc6c8729902c4d"
+    },
+    "base": {
+      "ref": "main",
+      "sha": "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+    }
+  },
+  "repository": {
+    "name": "nayax-infra-demo",
+    "owner": {
+      "login": "pini-bb"
+    }
+  }
+}

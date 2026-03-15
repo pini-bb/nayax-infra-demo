@@ -1,0 +1,92 @@
+name: Impact Summary
+
+on:
+  pull_request:
+    paths:
+      - 'product-packages/**'
+
+jobs:
+  impact:
+    name: Package Impact Summary
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed product packages
+        id: changed
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          CHANGED=$(git diff --name-only "origin/$BASE_REF"...HEAD | grep '^product-packages/' | awk -F/ '{print $2}' | sort -u)
+          echo "packages<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$CHANGED" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Build impact table and post PR comment
+        if: steps.changed.outputs.packages != ''
+        uses: actions/github-script@v7
+        env:
+          CHANGED_PACKAGES: ${{ steps.changed.outputs.packages }}
+        with:
+          script: |
+            const changedPackages = process.env.CHANGED_PACKAGES.trim().split('\n').filter(Boolean);
+
+            const fs = require('fs');
+            const path = require('path');
+
+            function findManifests(dir) {
+              const results = [];
+              if (!fs.existsSync(dir)) return results;
+              for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+                const full = path.join(dir, entry.name);
+                if (entry.isDirectory()) results.push(...findManifests(full));
+                else if (entry.name.endsWith('.yaml') || entry.name.endsWith('.yml')) results.push(full);
+              }
+              return results;
+            }
+
+            const manifests = findManifests('environments');
+            const rows = [];
+
+            for (const pkg of changedPackages) {
+              const blueprintName = pkg.replace(/-/g, '_');
+              for (const manifest of manifests) {
+                const content = fs.readFileSync(manifest, 'utf8');
+                if (content.includes(`blueprint: ${blueprintName}`)) {
+                  const versionMatch = content.match(/version:\s*(\S+)/);
+                  const nameMatch = content.match(/name:\s*(\S+)/);
+                  rows.push({
+                    deployment: nameMatch ? nameMatch[1] : path.basename(manifest),
+                    package: pkg,
+                    version: versionMatch ? versionMatch[1] : 'unknown',
+                    action: 'Review and bump version in manifest after package is published'
+                  });
+                }
+              }
+            }
+
+            let body = '## Package Impact Summary\n\n';
+            body += `**Changed packages:** ${changedPackages.join(', ')}\n\n`;
+
+            if (rows.length > 0) {
+              body += '| Deployment | Package | Current Version | Action Required |\n';
+              body += '|------------|---------|-----------------|----------------|\n';
+              for (const row of rows) {
+                body += `| \`${row.deployment}\` | \`${row.package}\` | \`${row.version}\` | ${row.action} |\n`;
+              }
+            } else {
+              body += '_No environment deployments reference these packages yet._\n';
+            }
+
+            body += '\n> **Note:** Input-level diffs (which specific inputs changed) are not yet native in BlueBricks. This table shows affected deployments and versions only.\n';
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });
