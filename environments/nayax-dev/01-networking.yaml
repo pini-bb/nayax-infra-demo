@@ -4,7 +4,7 @@ metadata:
   name: nayax-dev-networking
 spec:
   blueprint: networking_stack
-  version: 1.0.6
+  version: 1.0.7
   collection: andrii-test-1-1
   force: false
   planOnly: false
