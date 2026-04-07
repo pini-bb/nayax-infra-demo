@@ -1,5 +1,5 @@
 name: rds_cluster
-version: 1.0.7
+version: 1.0.8
 description: "Aurora PostgreSQL RDS cluster"
 
 inputs:
