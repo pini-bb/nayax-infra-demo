@@ -1,5 +1,5 @@
 name: networking_stack
-version: 1.0.7
+version: 1.0.8
 description: "VPC with public/private subnets across multiple AZs"
 
 inputs:
@@ -34,7 +34,7 @@ packages:
   - id: aws_vpc
     name: aws_vpc
     version: 5.21.0
-    source: git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=v6.6.0
+    source: git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=v6.6.1
     native:
       type: opentofu
       version: "1.11.4"
